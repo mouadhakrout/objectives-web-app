@@ -2,6 +2,9 @@
 <html>
 <head>
   <meta charset="utf-8">
+    <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <link rel="stylesheet" type="text/css" href="./styles.css">
 </head>
 <body>
   <div id="root"></div>
@@ -12,25 +15,255 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/redux/4.0.0/redux.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-redux/5.0.7/react-redux.js"></script>
 
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <!-- Latest compiled and minified JavaScript -->
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.3.0/Chart.bundle.js"></script>
+  <script src=" http://jonmiles.github.io/bootstrap-treeview/js/bootstrap-treeview.js"></script>
+
   <script type="text/babel">
+
     const OBJECTIVES = [
-      { "id": 1, "title": "First objective", "start": 0, "target": 50, "current": 20, "start_date": "2018-01-05", "end_date": "2018-03-05" },
-      { "id": 2, "title": "Second objective", "start": 10, "target": 42, "current": 20, "start_date": "2018-01-25", "end_date": "2018-03-30", "parent_id": 1 },
-      { "id": 3, "title": "Old objective", "start": 20, "target": 0, "current": 20, "start_date": "2018-02-05", "end_date": "2018-03-05", "parent_id": 4 },
-      { "id": 4, "title": "French objective", "start": 0, "target": 50, "current": 60, "start_date": "2018-01-05", "end_date": "2018-03-05", "parent_id": 2 },
-      { "id": 5, "title": "Void objective", "start": 10, "target": 42, "current": -20, "start_date": "2018-01-25", "end_date": "2018-03-30", "parent_id": 2 }
+      { "id": 1,"parent_id":1,"title": "First objective", "start": 0, "target": 50, "current": 20, "start_date": "2018-01-05", "end_date": "2018-03-05" },
+      { "id": 2,"parent_id":2, "title": "Second objective", "start": 10, "target": 42, "current": 20, "start_date": "2018-01-25", "end_date": "2018-03-30", "parent_id": 1 },
+      { "id": 3,"parent_id":1, "title": "Old objective", "start": 20, "target": 0, "current": 20, "start_date": "2018-02-05", "end_date": "2018-03-05", "parent_id": 4 },
+      { "id": 4,"parent_id":5, "title": "French objective", "start": 0, "target": 50, "current": 60, "start_date": "2018-01-05", "end_date": "2018-03-05", "parent_id": 2 },
+      { "id": 5,"parent_id":2, "title": "Void objective", "start": 10, "target": 42, "current": -20, "start_date": "2018-01-25", "end_date": "2018-03-30", "parent_id": 2 }
     ];
     const TODAY = "2018-02-20";
 
+    class TopPageTitle extends React.Component{
+     constructor(props){
+        super();
+     }
+
+       render(){ 
+          return (<h2>{this.props.itemsNumber} objectives have their current value over their target</h2>);
+       }
+    }
+
+    class Objective extends React.Component{
+      state = {
+        value: {}
+      }
+     constructor(props){
+        super();
+        const { value } = props;
+        this.state = {value};
+     }
+    componentDidMount() {
+            const { value } = this.props;
+            const ctx = document.getElementById("objectiveCanvas" + value.id);
+            if(ctx!==null && ctx!==undefined){
+            const myChart = new Chart(ctx.getContext("2d"), {
+              type: 'line',
+              data: {
+                labels: [new Date(new Date(value.start_date).setHours(0,0,0,0)).toLocaleString(),new Date(new Date(this.props.todayDate).setHours(0,0,0,0)).toLocaleString(),  new Date(new Date(value.end_date).setHours(0,0,0,0)).toLocaleString()],
+                datasets: [{
+                  label: 'Curve',
+                  data: [{
+                      t: new Date(value.start_date).setHours(0,0,0,0),
+                      y: value.start
+                    },
+                    {
+                      t: new Date(this.props.todayDate).setHours(0,0,0,0),
+                      y: value.current
+                    },
+                    {
+                      t: new Date(value.end_date).setHours(0,0,0,0),
+                      y: value.target
+                    }
+                  ],
+                  backgroundColor: [
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(255, 206, 86, 0.2)',
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(153, 102, 255, 0.2)',
+                    'rgba(255, 159, 64, 0.2)'
+                  ],
+                  borderColor: [
+                    'rgba(255,99,132,1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)'
+                  ],
+                  borderWidth: 1
+                }]
+              }
+            });
+          }
+       }
+       shouldComponentUpdate (nextProps, nextState) {
+          if(nextProps.value !== this.props.value){ return true}
+        }
+        componentDidUpdate(prevProps, prevState) {
+           if(prevProps.value !== this.props.value && prevProps.value.id == this.props.selectedObjectiveId){ this.componentDidMount()}
+        }
+       render(){ 
+          const { value } =this.props;
+          return (
+
+           <li className="list-group-item d-flex justify-content-between align-items-center">
+              <ul className="list-group">
+              <li className="list-group-item">
+              <span className="badge badge-primary badge-pill">Current Value: {value.current}</span>
+                {value.title}
+              </li>
+            </ul>
+                <button type="button" className="btn btn-primary" onClick={(e) => this.props.incrementObjective(value.id)}>Increment Current Value</button>
+
+              <canvas className="curve_canvas" id={"objectiveCanvas"+value.id}/>
+            </li>
+
+          );
+       }
+    }
+
+    class ObjectivesList extends React.Component{
+       constructor(props){
+          super(props);
+          this.state = {objectives: []};
+       }
+       componentDidMount() {
+         this.props.receiveObjectives();
+       }
+       shouldComponentUpdate (nextProps, nextState) {
+          if(nextProps.objectives !== this.props.objectives){ return true}
+        }
+       render(){                   
+         const listItems = this.props.objectives.map((item) =>
+            <ObjectivesContainer key={"objectiveCanvas"+ item.id} value={item} todayDate={this.props.todayDate}/>
+          );
+            return (<div>
+              <button type="button" className="btn btn-primary" onClick={(e) =>this.props.randomIncrement()}>Random increment Objective current value</button>
+              <ul>{listItems}</ul></div>);
+         }
+    }
+    class ObjectivesTreeView extends React.Component{
+     constructor(props){
+        super();
+         this.list_to_tree = this.list_to_tree.bind(this);
+         this.getTree = this.getTree.bind(this);
+     }
+     list_to_tree(list, root) {
+           var map = {}, node, roots = [], i;
+          for (i = 0; i < list.length; i += 1) {
+              map[list[i].id] = i; // initialize the map
+              list[i].nodes = []; // initialize the children
+          }
+          for (i = 0; i < list.length; i += 1) {
+              node = list[i];
+              node.text = node.title;
+              if (node.parent_id !== root) {
+                  // if you have dangling branches check that map[node.parent_id] exists
+                  list[map[node.parent_id]].nodes.push(node);
+              } else {
+                  roots.push(node);
+              }
+          }
+        return roots;
+      }
+       getTree() {
+        return this.list_to_tree(this.props.items, 1);
+      }
+       componentDidMount() {
+          $('#tree').treeview({data:this.getTree()});
+       }
+       render(){ 
+          return (<div id="tree"></div>);
+       }
+    }
+    // Reducer: Handles state transitions for the store
+    function objectivesReducer (currentState, action) {
+      currentState = currentState || {objectives:[],selectedObjectiveId:null}; // Initial State
+      // remove object reference
+      let string = JSON.stringify(currentState);
+      let newState = JSON.parse(string);
+      switch (action.type) {
+       case 'GET_OBJECTIVES':
+            console.log('RECEIVE_OBJECTIVES Action')
+            return {...currentState, objectives: action.objectives};
+
+       case 'RANDOM_INCREMENT':
+            let randomId = Math.floor(Math.random() * currentState.objectives.length)+1;
+            if(randomId!==null && randomId!==undefined && !currentState.objectives.filter(objective=> objective.id == randomId).length == 0){
+            console.log('RANDOM_INCREMENT Action Objective with id', randomId);
+            newState.objectives.map((objective) => {
+              if(objective.id==randomId) {
+                objective.current++;
+              }
+      
+            });
+            return newState;}
+            else{
+            return currentState;
+          }
+         case 'INCREMENT_OBJECTIVE':
+             let objectiveId = action.id;
+             if(objectiveId!==null && objectiveId!==undefined){
+            console.log('INCREMENT_OBJECTIVE Action Objective with id', objectiveId);
+            newState.objectives.map((objective) => {
+              if(objective.id==objectiveId) {
+                objective.current++;
+              }
+      
+            });
+            return {objectives:newState.objectives,selectedObjectiveId:objectiveId};
+          }
+            else{
+              return currentState;
+            }
+
+       default:
+          return currentState; // Always return the state
+      }
+    }
+    function randomIncrement () {
+      return {type: 'RANDOM_INCREMENT'};
+    } 
+    function incrementObjective (id) {
+      return {type: 'INCREMENT_OBJECTIVE',id:id};
+    }  
+    function receiveObjectives() {
+      return {type: 'GET_OBJECTIVES', objectives: OBJECTIVES};
+    }
+      // Map state and dispatch to props
+    const mapStateToProps = (state) => {  
+      return {
+        objectives: state.objectives,
+        selectedObjectiveId: state.selectedObjectiveId
+        };
+    }
+    const mapDispatchToProps = (dispatch) => {
+      return Redux.bindActionCreators({
+        randomIncrement: randomIncrement,
+        incrementObjective:incrementObjective,
+        receiveObjectives: receiveObjectives,
+      }, dispatch);
+     }
 
     // PUT YOUR CODE HERE AND MODIFY App
+   const ObjectivesListContainer = ReactRedux.connect(mapStateToProps, mapDispatchToProps)(ObjectivesList);
+   const ObjectivesContainer = ReactRedux.connect(mapStateToProps, mapDispatchToProps)(Objective);
 
     const App = () =>
-      <div>CHALLENGE JAVELO</div>
-
+      <div className="container">
+        <TopPageTitle itemsNumber={OBJECTIVES.length}/>
+        <ObjectivesListContainer todayDate={TODAY}/>
+        <ObjectivesTreeView items ={OBJECTIVES}/>
+      </div>
+    
+    // Create Store
+    var objectivesStore = Redux.createStore(objectivesReducer);
+    const Provider = ReactRedux.Provider; // Injects store into context of all descendents
 
     ReactDOM.render(
-      <App/>,
+      <Provider store={objectivesStore}>
+      <App/>
+      </Provider>,
       document.getElementById('root')
     );
   </script>
